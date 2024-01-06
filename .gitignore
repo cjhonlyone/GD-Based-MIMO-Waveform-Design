@@ -1,0 +1,16 @@
+WD*/
+M*/
+T*/
+__pycache__
+*.csv
+!example.csv
+*.xlsx
+*.gv
+*.pdf
+*.gv
+*.mat
+*.txt
+!requirments.txt
+!other.txt
+!README.md
+.idea/*
