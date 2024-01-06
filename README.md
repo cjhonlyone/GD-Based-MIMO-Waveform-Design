@@ -1,5 +1,8 @@
 ## Neural Network-inspired Phase-coded Waveform Design for MIMO Radar Based on Gradient Descent
 
+### PSL in main branch
+### WPSL in WPSL branch
+
 ### Requirments
 
 ```
@@ -19,7 +22,7 @@ python mptest.py example.csv
 
 ### Citation
 
-Please cite Caffe in your publications if it helps your research:
+Please cite this paper in your publications if it helps your research:
 
 ```
 
