@@ -1,3 +1,2 @@
-M,N,t,Algorithm,Struct,Layer,Loss,Learning Rate,Epochs,Initial Code,Opt Func,Eva Func,Result,Log Name,Params Count
-4,256,0.000153, NN, NNGD,1, NNGDLOSS, lrstepscheduler,20000, b,TrainNN,CalSL,0,0,0
-4,1024,9.53674E-06, NN, NNGD,1, NNGDLOSS, lrstepscheduler,20000, b,TrainNN,CalSL,0,0,0
+M,N,t,G,E,W,Algorithm,Struct,Layer,Loss,Learning Rate,Epochs,Initial Code,Opt Func,Eva Func,Result,Log Name
+3,256,0.000152588,51,80,0.0001,NN,NNGD,2,NNGDLOSS,lrstepscheduler,20000,c,TrainNN,CalSL,0,0

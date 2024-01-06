@@ -56,7 +56,7 @@ class Worker(Process):
                     
                 else:
                     
-                    jobdir="{Name}_{Algorithm}_{Struct}_{Layer}_{Loss}_{LR}_{IC}_{M}_{N}_{Epochs}".format(
+                    jobdir="{Name}_{Algorithm}_{Struct}_{Layer}_{Loss}_{LR}_{IC}_{M}_{N}_{G}_{E}_{Epochs}".format(
                                                                                             Name = 'Job'+str(Counter),
                                                                                             Algorithm = job['Algorithm'],
                                                                                             Struct = job['Struct'].__name__,
@@ -66,6 +66,8 @@ class Worker(Process):
                                                                                             IC = job['Initial Code'],
                                                                                             M = job['M'],
                                                                                             N = job['N'],
+                                                                                            G = job['G'],
+                                                                                            E = job['E'],
                                                                                             Epochs = job['Epochs'])
                     Counter = Counter + 1
                     logger.info(jobdir)
@@ -82,10 +84,13 @@ class Worker(Process):
                     with open(job["Log Name"],"a+") as f:
                         f.write(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+",")
                         f.write(f"{end_job - start_job},")
-                        f.write("{M},{N},{t},{Algorithm},{Struct},{Layer},{Loss},{LR},{Epochs},{IC},{PC},".format(
+                        f.write("{M},{N},{t},{G},{E},{W},{Algorithm},{Struct},{Layer},{Loss},{LR},{Epochs},{IC},{PC},".format(
                                                                                                 M = job['M'],
                                                                                                 N = job['N'],
                                                                                                 t = job['t'],
+                                                                                                G = job['G'],
+                                                                                                E = job['E'],
+                                                                                                W = job['W'],
                                                                                                 Algorithm = job['Algorithm'],
                                                                                                 Struct = job['Struct'].__name__,
                                                                                                 Layer = job['Layer'],
@@ -94,7 +99,8 @@ class Worker(Process):
                                                                                                 Epochs = job['Epochs'],
                                                                                                 IC = job['Initial Code'],
                                                                                                 PC = job["Params Count"]))
-                        f.write('{: .2f},{: .2f},{: .2f},{: .2f},{: .2f},{: .2f},'.format(job["Result"]["PSL"],job["Result"]["ISL"],job["Result"]["APSL"],job["Result"]["CPSL"],job["Result"]["AISL"],job["Result"]["CISL"]))
+                        for key in job["Result"]:
+                            f.write('{: .2f},'.format(job["Result"][key]))
                         f.write('\n')
                         
                     logger.info(f"Time taken to execute JobID - {job['Layer']} on Worker - {self.name} is {end_job - start_job}")
@@ -170,8 +176,8 @@ if __name__ == "__main__":
         print("Generate a csv example.")
         with open("example.csv", "w", newline='') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["M",  "N","t","Algorithm","Struct","Layer","Loss","Learning Rate","Epochs","Initial Code","Opt Func","Eva Func","Result","Log Name", "Params Count"])
-            writer.writerow(["4","256","0.000153"," NN"," NNGD","1"," NNGDLOSS"," lrstepscheduler","20000"," b","TrainNN","CalSL","0","0","0"])
+            writer.writerow(["M","N","t","G","E","W","Algorithm","Struct","Layer","Loss","Learning Rate","Epochs","Initial Code","Opt Func","Eva Func","Result","Log Name"])
+            writer.writerow(["3","256",float(10/256/256),"51","80","0.0001","NN","NNGD","2","NNGDLOSS","lrstepscheduler","20000","c","TrainNN","CalSL","0","0"])
         sys.exit(1)
         
     workerfile = sys.argv[1]
@@ -193,6 +199,9 @@ if __name__ == "__main__":
         job["M"] = int(job["M"])
         job["N"] = int(job["N"])
         job["t"] = float(job["t"])
+        job["G"] = int(job["G"])
+        job["E"] = int(job["E"])
+        job["W"] = float(job["W"])
         job["Layer"] = int(job["Layer"])
         job["Epochs"] = int(job["Epochs"])
 
@@ -209,12 +218,12 @@ if __name__ == "__main__":
 
     LogSysInfo()
 
-    cpfilelist = [workerfile, "NNGD.py","NNGDLOSS.py","Waveform_Evaluate.py","lrscheduler.py","mptest.py","train.py","colectresult.py"]
+    cpfilelist = [workerfile, "ResCON.py","ResCONLOSS.py","Waveform_Evaluate.py","lrscheduler.py","mptest.py","train.py","colectresult.py"]
     for ff in cpfilelist:
         os.popen('cp ' + '../'+ff+' ' + ff)
 
     LogName = 'DL'+ datetime.now().strftime("%Y%m%d%H%M%S") + '.csv'
-    LogList = ["Log Time", "Duration", "M", "N", "t", "Algorithm", "Struct", "Layer", "Loss", "Learnning Rate", "Epochs", "Initial Code", "Params Count", "PSL", "ISL", "APSL", "CPSL", "AISL", "CISL", "Remark"]
+    LogList = ["Log Time", "Duration", "M", "N", "t", "G", "E", "W", "Algorithm", "Struct", "Layer", "Loss", "Learnning Rate", "Epochs", "Initial Code", "Params Count"]
     with open(LogName, "w", newline='') as csvfile: 
         writer = csv.writer(csvfile)
         writer.writerow(LogList)

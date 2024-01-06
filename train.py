@@ -46,9 +46,8 @@ def TrainNN(job):
 
     learning_rate = 0.01
     model = job['Struct'](M=job['M'], N=job['N'], num_blocks=job['Layer'])
-    loss_fn = job['Loss'](M=job['M'], N=job['N'], t = job['t'])
+    loss_fn = job['Loss'](M=job['M'], N=job['N'], t = job['t'], G = job['G'], E = job['E'], W = job['W'], device=device, dtype=dtype)
     x = torch.rand([mybatch_size*mybatch_length, job['M']*job['N']], device=device, dtype=dtype)
-
     
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -122,13 +121,23 @@ def CalSL(job, waveform):
 def LogSL(job, waveform):
     X = np.transpose(np.reshape(np.exp(1j*waveform*np.pi*2), [job['M'], job['N']]))
     cm = wf.Calculate_CM(X)
-    [ISL, PSL, AISL, APSL, CISL, CPSL] = wf.Calculate_ISL_PSL(cm)
+
+    Groupdiag_cm = np.ones([2*job["N"] - 1, job["M"] * job["M"]]) * 1e-50
+    Groupdiag_cm[(job["N"]+job["G"]-1):(job["N"]+job["E"]), :] = np.ones([job["E"]-job["G"]+1,job["M"] * job["M"]])
+    Groupdiag_cm[(job["N"]-job["E"]-1):(job["N"]-job["G"]), :] = np.ones([job["E"]-job["G"]+1,job["M"] * job["M"]])
+    [ISL, PSL, AISL, APSL, CISL, CPSL] = wf.Calculate_ISL_PSL(cm * Groupdiag_cm)
+
+    Groupdiag_cm = np.ones([2*job["N"] - 1, job["M"] * job["M"]]) 
+    Groupdiag_cm[(job["N"]+job["G"]-1):(job["N"]+job["E"]), :] = np.ones([job["E"]-job["G"]+1,job["M"] * job["M"]]) * 1e-50
+    Groupdiag_cm[(job["N"]-job["E"]-1):(job["N"]-job["G"]), :] = np.ones([job["E"]-job["G"]+1,job["M"] * job["M"]]) * 1e-50
+    [ISLo, PSLo, AISLo, APSLo, CISLo, CPSLo] = wf.Calculate_ISL_PSL(cm * Groupdiag_cm)
     # wf.Plot_ACM(cm);
     # wf.Plot_CCM(cm);
     
     # write to csv
     
     print("M = {:d}, N = {:d},  PSL = {: .2f} dB, ISL = {: .2f} dB, APSL = {: .2f} dB, AISL = {: .2f} dB, CPSL = {: .2f} dB, CISL = {: .2f} dB".format(job['M'], job['N'], PSL, ISL, APSL, AISL, CPSL, CISL))
+    print("M = {:d}, N = {:d},  PSL = {: .2f} dB, ISL = {: .2f} dB, APSL = {: .2f} dB, AISL = {: .2f} dB, CPSL = {: .2f} dB, CISL = {: .2f} dB".format(job['M'], job['N'], PSLo, ISLo, APSLo, AISLo, CPSLo, CISLo))
     print("M = {:d}, N = {:d}, WelchPSL = {: .2f} dB".format(job['M'], job['N'], 10*np.log10((job['M']-1)/(2*job['M']*job['N']-job['M']-1))))
     print("M = {:d}, N = {:d}, WelchISL = {: .2f} dB".format(job['M'], job['N'], 10*np.log10(job['M']*(job['M']-1))))
     
@@ -140,7 +149,15 @@ def LogSL(job, waveform):
                                                 "APSL":APSL,
                                                 "AISL":AISL,
                                                 "CPSL":CPSL,
-                                                "CISL":CISL
+                                                "CISL":CISL,
+                                                "PSLo":PSLo,
+                                                "ISLo":ISLo,
+                                                "APSLo":APSLo,
+                                                "AISLo":AISLo,
+                                                "CPSLo":CPSLo,
+                                                "CISLo":CISLo,
+                                                "G":job["G"],
+                                                "E":job["E"],
+                                                "W":job["W"]
                                               })
-    
     job["Result"] = {"PSL":PSL,"ISL":ISL,"APSL":APSL,"AISL":AISL,"CPSL":CPSL,"CISL":CISL}
