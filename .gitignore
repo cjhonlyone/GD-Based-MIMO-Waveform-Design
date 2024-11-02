@@ -1,0 +1,10 @@
+WD*/
+__pycache__
+*.csv
+!example.csv
+*.xlsx
+*.txt
+!requirments.txt
+!other.txt
+!README.md
+!matlab/*
